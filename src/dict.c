@@ -257,6 +257,7 @@ int dictRehash(dict *d, int n) {
             if (--empty_visits == 0) return 1;
         }
         de = d->ht[0].table[d->rehashidx];
+		// 单线程简化了各种可能修改导致问题
         /* Move all the keys in this bucket from the old to the new hash HT */
         while(de) {
             unsigned int h;

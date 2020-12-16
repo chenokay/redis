@@ -46,6 +46,7 @@
 
 typedef struct dictEntry {
     void *key;
+	// C++中可使用模板定义不同value类型
     union {
         void *val;
         uint64_t u64;
@@ -67,6 +68,7 @@ typedef struct dictType {
 /* This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
 typedef struct dictht {
+	// 链式hash
     dictEntry **table;
     unsigned long size;
     unsigned long sizemask;
@@ -74,9 +76,11 @@ typedef struct dictht {
 } dictht;
 
 typedef struct dict {
+	// 函数接口
     dictType *type;
     void *privdata;
     dictht ht[2];
+	// rehash后迁移数据下标
     long rehashidx; /* rehashing not in progress if rehashidx == -1 */
     unsigned long iterators; /* number of iterators currently running */
 } dict;
