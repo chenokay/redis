@@ -135,6 +135,7 @@ void aeStop(aeEventLoop *eventLoop) {
 int aeCreateFileEvent(aeEventLoop *eventLoop, int fd, int mask,
         aeFileProc *proc, void *clientData)
 {
+	// event类型？
     if (fd >= eventLoop->setsize) {
         errno = ERANGE;
         return AE_ERR;
@@ -230,6 +231,7 @@ int aeDeleteTimeEvent(aeEventLoop *eventLoop, long long id)
                 eventLoop->timeEventHead = te->next;
             else
                 prev->next = te->next;
+			// 退出时处理过程
             if (te->finalizerProc)
                 te->finalizerProc(eventLoop, te->clientData);
             zfree(te);
@@ -285,10 +287,13 @@ static int processTimeEvents(aeEventLoop *eventLoop) {
     if (now < eventLoop->lastTime) {
         te = eventLoop->timeEventHead;
         while(te) {
+			// 重置需要处理时间点到0，都进行提前处理
+			// 但会不会卡顿？
             te->when_sec = 0;
             te = te->next;
         }
     }
+	// 仅仅使用了记录和探测系统时间异常情况
     eventLoop->lastTime = now;
 
     te = eventLoop->timeEventHead;
@@ -297,6 +302,8 @@ static int processTimeEvents(aeEventLoop *eventLoop) {
         long now_sec, now_ms;
         long long id;
 
+		// 在处理过程中，可能不断有event插入
+		// 这个地方check 可以避免一直处理新插入event情况
         if (te->id > maxId) {
             te = te->next;
             continue;
@@ -364,6 +371,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
         ((flags & AE_TIME_EVENTS) && !(flags & AE_DONT_WAIT))) {
         int j;
         aeTimeEvent *shortest = NULL;
+		// 获取该时间范围内需要处理所有event
         struct timeval tv, *tvp;
 
         if (flags & AE_TIME_EVENTS && !(flags & AE_DONT_WAIT))
@@ -397,6 +405,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
             }
         }
 
+		// 获取所有需要处理event 总和
         numevents = aeApiPoll(eventLoop, tvp);
         for (j = 0; j < numevents; j++) {
             aeFileEvent *fe = &eventLoop->events[eventLoop->fired[j].fd];
