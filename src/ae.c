@@ -44,6 +44,8 @@
 #include "zmalloc.h"
 #include "config.h"
 
+// 目前生产环境主要是epoll和select
+
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
 #ifdef HAVE_EVPORT

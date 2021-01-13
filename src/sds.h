@@ -40,6 +40,8 @@
 #include <stdint.h>
 
 typedef char *sds;
+/// 在字符串之前预留内存设置字符串使用长度和申请长度
+// 方便无差别进行操作，同时能存储非可见字符
 
 /* Note: sdshdr5 is never used, we just access the flags byte directly.
  * However is here to document the layout of type 5 SDS strings. */
@@ -51,6 +53,8 @@ struct __attribute__ ((__packed__)) sdshdr8 {
     uint8_t len; /* used */
     uint8_t alloc; /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
+	// 一般情况下使用了进行后面可变长数组访问入口，且不占内存
+	// 再sds中，buf没有作为一般使用
     char buf[];
 };
 struct __attribute__ ((__packed__)) sdshdr16 {
