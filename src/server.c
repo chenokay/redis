@@ -778,6 +778,9 @@ int activeExpireCycleTryExpire(redisDb *db, dictEntry *de, long long now) {
  * executed, where the time limit is a percentage of the REDIS_HZ period
  * as specified by the REDIS_EXPIRELOOKUPS_TIME_PERC define. */
 
+// 在主流程线程中，随机获取key，若key的过期比例大于25%
+// 则会同步或者异步清理key，异步方式清理key放在单独线程中进行
+
 void activeExpireCycle(int type) {
     /* This function has some global state in order to continue the work
      * incrementally across calls. */
@@ -3447,6 +3450,7 @@ void evictionPoolPopulate(dict *sampledict, dict *keydict, struct evictionPoolEn
     if (samples != _samples) zfree(samples);
 }
 
+// 在写入命令触发判断，根据淘汰策略删除数据
 int freeMemoryIfNeeded(void) {
     size_t mem_reported, mem_used, mem_tofree, mem_freed;
     int slaves = listLength(server.slaves);
