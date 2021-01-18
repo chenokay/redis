@@ -1237,6 +1237,8 @@ void aofClosePipes(void) {
 /* ----------------------------------------------------------------------------
  * AOF background rewrite
  * ------------------------------------------------------------------------- */
+// 适用fork进程方式进行aof 落盘，落盘事件注册到ae event中
+// 同时aof 配置修改，aof command也会触发aof 操作
 
 /* This is how rewriting of the append only file in background works:
  *
