@@ -108,6 +108,8 @@ static intset *intsetResize(intset *is, uint32_t len) {
     return is;
 }
 
+// 有序存储，可以进行二分查找
+// integer set
 /* Search for the position of "value". Return 1 when the value was found and
  * sets "pos" to the position of the value within the intset. Return 0 when
  * the value is not present in the intset and sets "pos" to the position

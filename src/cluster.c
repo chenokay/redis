@@ -630,6 +630,7 @@ void clusterAcceptHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
 /* We have 16384 hash slots. The hash slot of a given key is obtained
  * as the least significant 14 bits of the crc16 of the key.
  *
+ * hash tags的支持
  * However if the key contains the {...} pattern, only the part between
  * { and } is hashed. This may be useful in the future to force certain
  * keys to be in the same node (assuming no resharding is in progress). */
@@ -3132,6 +3133,7 @@ void clusterCron(void) {
 
     iteration++; /* Number of times this function was called so far. */
 
+	//  节点ip是可以变动的
     /* We want to take myself->ip in sync with the cluster-announce-ip option.
      * The option can be set at runtime via CONFIG SET, so we periodically check
      * if the option changed to reflect this into myself->ip. */
@@ -3178,6 +3180,7 @@ void clusterCron(void) {
             continue;
         }
 
+		// 建立链接
         if (node->link == NULL) {
             int fd;
             mstime_t old_ping_sent;
@@ -3209,6 +3212,7 @@ void clusterCron(void) {
              * of a PING one, to force the receiver to add us in its node
              * table. */
             old_ping_sent = node->ping_sent;
+			// 同步当前节点信息(1/10 cluster)给node
             clusterSendPing(link, node->flags & CLUSTER_NODE_MEET ?
                     CLUSTERMSG_TYPE_MEET : CLUSTERMSG_TYPE_PING);
             if (old_ping_sent) {
@@ -3250,6 +3254,7 @@ void clusterCron(void) {
                 min_pong = this->pong_received;
             }
         }
+		/// 对于最老的pong进行再次ping
         if (min_pong_node) {
             serverLog(LL_DEBUG,"Pinging node %.40s", min_pong_node->name);
             clusterSendPing(min_pong_node->link, CLUSTERMSG_TYPE_PING);
@@ -3374,6 +3379,7 @@ void clusterCron(void) {
          * the orphaned masters. Note that it does not make sense to try
          * a migration if there is no master with at least *two* working
          * slaves. */
+		// 若该节点所在cluster的slave大于等于2，可以进行replication(迁移作为单主节点的从节点)
         if (orphaned_masters && max_slaves >= 2 && this_slaves == max_slaves)
             clusterHandleSlaveMigration(max_slaves);
     }
